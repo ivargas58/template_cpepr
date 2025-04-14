@@ -3,7 +3,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('Actualizando el repo');
+  res.send('Actualizando el repositorio de ivargas');
 });
 
 app.listen(PORT, () => {
