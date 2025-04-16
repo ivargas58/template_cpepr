@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const pool = require('./db');
+const pool = require('db.js');
 const path = require('path');
 
 // Middleware para leer body de formularios
