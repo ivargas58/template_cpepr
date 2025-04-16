@@ -8,21 +8,11 @@
 </head>
 <body>
     <div class="login-container">
-        <h1>Login</h1>
-        <label for="email">Email:</label>
-        <input type="text" id="email" placeholder="Ingrese su email">
-
-        <label for="password">Password:</label>
-        <div class="password-wrapper">
-            <input type="password" id="password" placeholder="Ingrese su contraseña">
-            <button id="togglePassword" type="button">👁</button>
-        </div>
-
-        <a href="#" class="forgot-password">Forgot password?</a>
-
-        <button class="login-btn">Login</button>
-    </div>
-
-    <script src="scripts.js"></script>
-</body>
+        <h2>Iniciar Sesión</h2>
+        <form action="/login" method="POST">
+          <input type="email" name="email" placeholder="Correo electrónico" required />
+          <input type="password" name="password" placeholder="Contraseña" required />
+          <button type="submit">Ingresar</button>
+        </form>
+      </div>
 </html>
