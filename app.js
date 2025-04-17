@@ -49,13 +49,15 @@ app.get('/usuarios', async (req, res) => {
     const result = await pool.query('SELECT * FROM usuarios');
     res.json(result.rows);
   } catch (err) {
-    console.error(' Error al obtener usuarios:', err);
+    console.error('❌ Error al obtener usuarios:', err); // Mostrará el error completo
     res.status(500).send(`
       <h1>Error al obtener usuarios</h1>
       <p>${err.message}</p>
+      <pre>${err.stack}</pre>
     `);
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
