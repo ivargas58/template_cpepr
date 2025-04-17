@@ -8,6 +8,9 @@ const pool = new Pool({
   password: 'postgres',               
   database: 'simple_node_app',             
   port: 5432,                           
+  ssl: {
+    rejectUnauthorized: false, // importante para RDS públicas sin certificado verificado
+  }
 });
 
 // Exporta el pool para usarlo en otros archivos
