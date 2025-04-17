@@ -39,7 +39,7 @@ app.post('/login', async (req, res) => {
     }
   } catch (err) {
     console.error(' Error al ejecutar la consulta SQL:', err);
-    res.status(500).send('Error al procesar login');
+    res.status(500).send('Error al procesar login' + err);
   }
 });
 
@@ -50,7 +50,10 @@ app.get('/usuarios', async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(' Error al obtener usuarios:', err);
-    res.status(500).send('Error al obtener usuarios' + err);
+    res.status(500).send(`
+      <h1>Error al obtener usuarios</h1>
+      <p>${err.message}</p>
+    `);
   }
 });
 
