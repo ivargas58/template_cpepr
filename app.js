@@ -50,7 +50,7 @@ app.get('/usuarios', async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(' Error al obtener usuarios:', err);
-    res.status(500).send('Error al obtener usuarios');
+    res.status(500).send('Error al obtener usuarios' + err);
   }
 });
 
