@@ -31,8 +31,10 @@ app.post('/login', async (req, res) => {
     );
 
     if (result.rows.length > 0) {
-      res.send('<h1>Login exitoso</h1><a href="/">Ir al inicio</a>');
+      // Redirigir al dashboard si las credenciales son correctas
+      res.redirect('/dashboard.html');
     } else {
+      // Mostrar mensaje de login inválido
       res.send('<h1>Login inválido</h1><a href="/jkx">Volver</a>');
     }
   } catch (err) {
@@ -40,6 +42,7 @@ app.post('/login', async (req, res) => {
     res.status(500).send('Error al procesar login');
   }
 });
+
 
 app.get('/usuarios', async (req, res) => {
   try {
