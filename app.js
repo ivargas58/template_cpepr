@@ -46,7 +46,7 @@ app.post('/login', async (req, res) => {
 
 app.get('/usuarios', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM usuarios');
+    const result = await pool.query('SELECT * FROM usuarios;');
     res.json(result.rows);
   } catch (err) {
     console.error('❌ Error al obtener usuarios:', err); // Mostrará el error completo
