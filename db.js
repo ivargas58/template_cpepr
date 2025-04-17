@@ -1,4 +1,4 @@
-// db.js
+/*// db.js
 const { Pool } = require('pg');
 
 // Configura tu conexión a la base de datos en RDS
@@ -15,3 +15,4 @@ const pool = new Pool({
 
 // Exporta el pool para usarlo en otros archivos
 module.exports = pool;
+*/

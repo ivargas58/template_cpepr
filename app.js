@@ -1,9 +1,21 @@
-// app.js
 const express = require('express');
+const { Pool } = require('pg');
+const path = require('path');
+
+// Configura tu conexión a la base de datos en RDS
+const pool = new Pool({
+  host: 'simple-node-app.cbkk2cg4ulnw.us-east-2.rds.amazonaws.com',
+  user: 'postgres',
+  password: 'postgres',
+  database: 'simple_node_app',
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false, // importante para RDS públicas sin certificado verificado
+  }
+});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-const pool = require('./db');
-const path = require('path');
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -38,18 +50,17 @@ app.post('/login', async (req, res) => {
       res.send('<h1>Login inválido</h1><a href="/jkx">Volver</a>');
     }
   } catch (err) {
-    console.error(' Error al ejecutar la consulta SQL:', err);
+    console.error('Error al ejecutar la consulta SQL:', err);
     res.status(500).send('Error al procesar login' + err);
   }
 });
-
 
 app.get('/usuarios', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM usuarios;');
     res.json(result.rows);
   } catch (err) {
-    console.error('❌ Error al obtener usuarios:', err); // Mostrará el error completo
+    console.error('Error al obtener usuarios:', err); // Mostrará el error completo
     res.status(500).send(`
       <h1>Error al obtener usuarios</h1>
       <p>${err.message}</p>
@@ -57,7 +68,6 @@ app.get('/usuarios', async (req, res) => {
     `);
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
