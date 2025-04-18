@@ -1,18 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
+const pool = require('./db');
 
-// Configura tu conexión a la base de datos en RDS
-const pool = new Pool({
-  host: 'simple-node-app.cbkk2cg4ulnw.us-east-2.rds.amazonaws.com',
-  user: 'postgres',
-  password: 'postgres',
-  database: 'simple_node_app',
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false, // importante para RDS públicas sin certificado verificado
-  }
-});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
