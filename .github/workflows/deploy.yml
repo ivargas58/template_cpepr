@@ -20,29 +20,21 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ec2-3-128-13-108.us-east-2.compute.amazonaws.com >> ~/.ssh/known_hosts
 
-      - name: Deploy to EC2 and set environment
+      - name: Create .env file
+        run: |
+          cat <<EOT > .env
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_PORT=${{ secrets.DB_PORT }}
+          EOT
+
+      - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << 'EOF'
-            # Eliminar repositorio existente (si existe)
-            if [ -d "simple-node-app" ]; then
-              rm -rf simple-node-app
-            fi
-
-            # Clonar el repositorio nuevamente
-            git clone https://github.com/ivargas58/simple-node-app.git
-
-            cd simple-node-app
-
-            # Crear el archivo .env desde los secrets
-            cat <<EOT > .env
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            EOT
-
-            # Instalar dependencias y reiniciar con PM2
+            cd ~/simple-node-app || git clone https://github.com/ivargas58/simple-node-app.git && cd simple-node-app
+            git pull origin main
             npm install
             pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
           EOF
