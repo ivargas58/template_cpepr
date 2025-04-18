@@ -2,8 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
-const pool = require('./db');
-
+const bcrypt = require('bcrypt');
+const pool = require('./db'); // Asegúrate que tu archivo db.js esté bien configurado
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,34 +28,54 @@ app.get('/jkx', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Login con detección automática de contraseñas en texto plano
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const result = await pool.query(
-      'SELECT * FROM usuarios WHERE email = $1 AND password = $2',
-      [email, password]
-    );
+    const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
 
-    if (result.rows.length > 0) {
-      // Redirigir al dashboard si las credenciales son correctas
-      res.redirect('/dashboard.html');
-    } else {
-      // Mostrar mensaje de login inválido
-      res.send('<h1>Login inválido</h1><a href="/jkx">Volver</a>');
+    if (result.rows.length === 0) {
+      return res.send('<h1>Usuario no encontrado</h1><a href="/jkx">Volver</a>');
     }
+
+    const usuario = result.rows[0];
+    const storedPassword = usuario.password;
+
+    const isHashed = storedPassword.startsWith('$2b$');
+
+    if (isHashed) {
+      const match = await bcrypt.compare(password, storedPassword);
+      if (!match) {
+        return res.send('<h1>Contraseña incorrecta</h1><a href="/jkx">Volver</a>');
+      }
+    } else {
+      if (password !== storedPassword) {
+        return res.send('<h1>Contraseña incorrecta</h1><a href="/jkx">Volver</a>');
+      }
+
+      // Hashear y actualizar contraseña automáticamente
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await pool.query('UPDATE usuarios SET password = $1 WHERE id = $2', [hashedPassword, usuario.id]);
+      console.log(`Contraseña convertida a hash para el usuario con ID ${usuario.id}`);
+    }
+
+    // Login exitoso
+    res.redirect('/dashboard.html');
+
   } catch (err) {
-    console.error('Error al ejecutar la consulta SQL:', err);
-    res.status(500).send('Error al procesar login' + err);
+    console.error('Error al procesar login:', err);
+    res.status(500).send('Error en el servidor al procesar el login.');
   }
 });
 
+// Ruta de prueba para ver usuarios (solo desarrollo, no usar en producción así)
 app.get('/usuarios', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM usuarios;');
     res.json(result.rows);
   } catch (err) {
-    console.error('Error al obtener usuarios:', err); // Mostrará el error completo
+    console.error('Error al obtener usuarios:', err);
     res.status(500).send(`
       <h1>Error al obtener usuarios</h1>
       <p>${err.message}</p>
