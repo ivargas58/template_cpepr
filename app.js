@@ -29,6 +29,7 @@ app.get('/jkx', (req, res) => {
 });
 
 // Login con detección automática de contraseñas en texto plano
+//Si no esta hashed lo hashed automaticamente
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
