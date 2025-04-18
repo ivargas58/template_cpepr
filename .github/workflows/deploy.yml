@@ -23,13 +23,15 @@ jobs:
       - name: Deploy to EC2 and set environment
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << 'EOF'
-            # Si no existe, clona el repo
-            if [ ! -d "simple-node-app" ]; then
-              git clone https://github.com/ivargas58/simple-node-app.git
+            # Eliminar repositorio existente (si existe)
+            if [ -d "simple-node-app" ]; then
+              rm -rf simple-node-app
             fi
 
+            # Clonar el repositorio nuevamente
+            git clone https://github.com/ivargas58/simple-node-app.git
+
             cd simple-node-app
-            git pull origin main
 
             # Crear el archivo .env desde los secrets
             cat <<EOT > .env
