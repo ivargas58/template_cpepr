@@ -3,7 +3,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const pool = require('./db'); // Asegúrate que tu archivo db.js esté bien configurado
+const pool = require('./db'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,7 +15,7 @@ app.use(express.json());
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rutas
+// Rutas get
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -27,9 +27,9 @@ app.get('/home', (req, res) => {
 app.get('/jkx', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-
-// Login con detección automática de contraseñas en texto plano
-//Si no esta hashed lo hashed automaticamente
+//Rutas post
+// Este login verifica el password si esta en texto plano de serlo asi lo encripta 
+// De estarlo solo lo valida sino encripta y luego valida
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -84,7 +84,7 @@ app.get('/usuarios', async (req, res) => {
     `);
   }
 });
-
+//Server route
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
