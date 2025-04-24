@@ -31,7 +31,7 @@ app.get('/servicios', (req, res) => {
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-//Rutas post
+
 // Este login verifica el password si esta en texto plano de serlo asi lo encripta 
 // De estarlo solo lo valida sino encripta y luego valida
 app.post('/login', async (req, res) => {
