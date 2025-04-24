@@ -105,10 +105,13 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-  const { nombre, email, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const existingUser = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+    const existingUser = await pool.query(
+      'SELECT * FROM usuarios WHERE email = $1',
+      [email]
+    );
 
     if (existingUser.rows.length > 0) {
       return res.send('<h1>El correo ya está registrado</h1><a href="/register">Volver</a>');
@@ -116,7 +119,10 @@ app.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await pool.query('INSERT INTO usuarios (nombre, email, password) VALUES ($1, $2, $3)', [nombre, email, hashedPassword]);
+    await pool.query(
+      'INSERT INTO usuarios (email, password) VALUES ($1, $2)',
+      [email, hashedPassword]
+    );
 
     res.send('<h1>Registro exitoso</h1><a href="/login">Iniciar sesión</a>');
   } catch (err) {
@@ -124,6 +130,7 @@ app.post('/register', async (req, res) => {
     res.status(500).send('Error en el servidor al registrar.');
   }
 });
+
 
 app.post('/forgot-password', async (req, res) => {
   const { email, newPassword } = req.body;
