@@ -36,6 +36,10 @@ app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
+app.get('/pago', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'pago.html'));
+});
+
 app.get('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -56,7 +60,7 @@ app.post('/login', async (req, res) => {
     const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
 
     if (result.rows.length === 0) {
-      return res.send('<h1>Usuario no encontrado</h1><a href="/jkx">Volver</a>');
+      return res.send('<h1>Usuario no encontrado</h1><a href="/">Volver</a>');
     }
 
     const usuario = result.rows[0];
@@ -81,7 +85,7 @@ app.post('/login', async (req, res) => {
     }
 
     // Login exitoso
-    res.redirect('/pago.html');
+    res.redirect('/pago');
 
   } catch (err) {
     console.error('Error al procesar login:', err);
