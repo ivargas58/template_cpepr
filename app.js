@@ -28,7 +28,7 @@ app.get('/servicios', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'servicios.html'));
 });
 
-app.get('/jkx', (req, res) => {
+app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 //Rutas post
