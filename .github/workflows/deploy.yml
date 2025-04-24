@@ -20,22 +20,22 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ec2-3-128-13-108.us-east-2.compute.amazonaws.com >> ~/.ssh/known_hosts
 
-      - name: Create .env file
-        run: |
-          cat <<EOT > .env
-          DB_HOST=${{ secrets.DB_HOST }}
-          DB_USER=${{ secrets.DB_USER }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_NAME=${{ secrets.DB_NAME }}
-          DB_PORT=${{ secrets.DB_PORT }}
-          FIX_SECRET=${{ secrets.FIX_SECRET }}
-          EOT
-
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << 'EOF'
+          ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << EOF
             cd ~/template_cpepr || git clone https://github.com/ivargas58/template_cpepr.git && cd template_cpepr
             git pull origin main
+
+            # Crear el archivo .env en EC2
+            cat <<EOT > .env
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            FIX_SECRET=${{ secrets.FIX_SECRET }}
+            EOT
+
             npm install
             pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
           EOF
