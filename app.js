@@ -120,10 +120,9 @@ app.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await pool.query(
-      'INSERT INTO usuarios (email, password) VALUES ($1, $2)',
-      [email, hashedPassword]
+      'INSERT INTO usuarios (id, email, password) VALUES ($1, $2, $3)',
+      [null, email, hashedPassword]
     );
-
     res.send('<h1>Registro exitoso</h1><a href="/login">Iniciar sesión</a>');
   } catch (err) {
     console.error('Error al registrar usuario:', err);
