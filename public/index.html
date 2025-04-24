@@ -5,16 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
 </head>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        background-color: #FFFFFF;
+    }
+
+    h1 {
+        text-align: left;
+        color: #000000;
+        margin: 20px 0;
+        margin-left: 10px;
+    }
+
+    .nav_container {
+        background-color: #F5F5F5;
+    }
+
+    .hamburger {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 24px;
+        padding: 10px 20px;
+        cursor: pointer;
+        color: #00913f;
+    }
+
+    .nav_bar {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        padding: 15px 0;
+        flex-wrap: wrap;
+    }
+
+    .nav_bar a {
+        text-decoration: none;
+        color: #00913f;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .nav_bar a:hover {
+        color: #000000;
+    }
+
+    @media (max-width: 768px) {
+        .hamburger {
+            display: block;
+            width: 100%;
+            text-align: right;
+        }
+
+        .nav_bar {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
+        }
+
+        .nav_bar.active {
+            display: flex;
+        }
+    }
+</style>
 <body>
-    <h1>Inapptik Software Inc.</h1>
-    <nav>
-        <a href="/">Home</a>
-        <a href="">Conocenos</a>
-        <a href="/servicios">Servicios</a>
-        <a href="">Revista Impulso</a>
-        <a href="">Contactanos</a>
-        <a href="">Ofertas de Empleo</a>
-        <a href="/login">Mi Cuenta</a>
-    </nav>
+    <h1>CPEPR</h1>
+    <div class="nav_container">
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <nav class="nav_bar" id="navMenu">
+            <a href="/">Home</a>
+            <a href="#">Conócenos</a>
+            <a href="/servicios">Servicios</a>
+            <a href="#">Revista Impulso</a>
+            <a href="#">Contáctanos</a>
+            <a href="#">Ofertas de Empleo</a>
+            <a href="/login">Mi Cuenta</a>
+        </nav>
+    </div>
+
+ <script src="scripts.js"></script>
 </body>
 </html>
