@@ -108,25 +108,23 @@ app.post('/register', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const existingUser = await pool.query(
-      'SELECT * FROM usuarios WHERE email = $1',
-      [email]
-    );
+    // Verificar si el usuario ya existe
+    const existingUser = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
 
     if (existingUser.rows.length > 0) {
       return res.send('<h1>El correo ya está registrado</h1><a href="/register">Volver</a>');
     }
 
+    // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await pool.query(
-      'INSERT INTO usuarios (email, password) VALUES ($1, $2)',
-      [email, hashedPassword]
-    );
+    // Insertar nuevo usuario (sin el campo nombre)
+    await pool.query('INSERT INTO usuarios (email, password) VALUES ($1, $2)', [email, hashedPassword]);
 
     res.send('<h1>Registro exitoso</h1><a href="/login">Iniciar sesión</a>');
+
   } catch (err) {
-    console.error('Error al registrar usuario:', err);
+    console.error('❌ Error al registrar usuario:', err.message);
     res.status(500).send('Error en el servidor al registrar.');
   }
 });
