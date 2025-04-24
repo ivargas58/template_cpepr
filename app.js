@@ -32,6 +32,21 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Error al cerrar sesión:', err);
+      return res.status(500).send('Error al cerrar sesión.');
+    }
+    res.redirect('/login');
+  });
+});
+
+
 // Este login verifica el password si esta en texto plano de serlo asi lo encripta 
 // De estarlo solo lo valida sino encripta y luego valida
 app.post('/login', async (req, res) => {
@@ -52,11 +67,11 @@ app.post('/login', async (req, res) => {
     if (isHashed) {
       const match = await bcrypt.compare(password, storedPassword);
       if (!match) {
-        return res.send('<h1>Contraseña incorrecta</h1><a href="/jkx">Volver</a>');
+        return res.send('<h1>Contraseña incorrecta</h1><a href="/login">Volver</a>');
       }
     } else {
       if (password !== storedPassword) {
-        return res.send('<h1>Contraseña incorrecta</h1><a href="/jkx">Volver</a>');
+        return res.send('<h1>Contraseña incorrecta</h1><a href="/login">Volver</a>');
       }
 
       // Hashear y actualizar contraseña automáticamente
@@ -66,13 +81,55 @@ app.post('/login', async (req, res) => {
     }
 
     // Login exitoso
-    res.redirect('/dashboard.html');
+    res.redirect('/pago.html');
 
   } catch (err) {
     console.error('Error al procesar login:', err);
     res.status(500).send('Error en el servidor al procesar el login.');
   }
 });
+
+app.post('/register', async (req, res) => {
+  const { nombre, email, password } = req.body;
+
+  try {
+    const existingUser = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+
+    if (existingUser.rows.length > 0) {
+      return res.send('<h1>El correo ya está registrado</h1><a href="/register">Volver</a>');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await pool.query('INSERT INTO usuarios (nombre, email, password) VALUES ($1, $2, $3)', [nombre, email, hashedPassword]);
+
+    res.send('<h1>Registro exitoso</h1><a href="/login">Iniciar sesión</a>');
+  } catch (err) {
+    console.error('Error al registrar usuario:', err);
+    res.status(500).send('Error en el servidor al registrar.');
+  }
+});
+
+app.post('/forgot-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  try {
+    const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+
+    if (result.rows.length === 0) {
+      return res.send('<h1>Correo no registrado</h1><a href="/forgot-password">Volver</a>');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE usuarios SET password = $1 WHERE email = $2', [hashedPassword, email]);
+
+    res.send('<h1>Contraseña actualizada correctamente</h1><a href="/login">Iniciar sesión</a>');
+  } catch (err) {
+    console.error('Error al recuperar contraseña:', err);
+    res.status(500).send('Error en el servidor al actualizar la contraseña.');
+  }
+});
+
 
 // Ruta de prueba para ver usuarios (solo desarrollo, no usar en producción así)
 app.get('/usuarios', async (req, res) => {
