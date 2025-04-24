@@ -34,7 +34,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << 'EOF'
-            cd ~/simple-node-app || git clone https://github.com/ivargas58/template_cpepr.git && cd template_cpepr
+            cd ~/template_cpepr || git clone https://github.com/ivargas58/template_cpepr.git && cd template_cpepr
             git pull origin main
             npm install
             pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
