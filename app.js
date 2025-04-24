@@ -4,6 +4,8 @@ const { Pool } = require('pg');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const pool = require('./db'); 
+const session = require('express-session');
+
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -11,6 +13,15 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'un-secreto-cualquiera',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 // 1 hora
+  }
+}));
+
 
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
