@@ -3,10 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Pagos Online</title>
 </head>
 <body>
-   <h1>Pago Online</h1>
-   <a href="/logout">Logout</a>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #FFFFFF;
+        }
+    
+        h1 {
+            text-align: left;
+            color: #000000;
+            margin: 20px 0;
+            margin-left: 10px;
+        }
+    
+        .nav_container {
+            background-color: #F5F5F5;
+        }
+    
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #00913f;
+        }
+    
+        .nav_bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 15px 0;
+            flex-wrap: wrap;
+        }
+    
+        .nav_bar a {
+            text-decoration: none;
+            color: #00913f;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+    
+        .nav_bar a:hover {
+            color: #000000;
+        }
+    
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+                width: 100%;
+                text-align: right;
+            }
+    
+            .nav_bar {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 10px 0;
+            }
+    
+            .nav_bar.active {
+                display: flex;
+            }
+        }
+    </style>
+    <div class="nav_container"> 
+        <h1>Pagos Online</h1>
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <nav class="nav_bar" id="navMenu">
+            <a href="/logout">Logout</a>
+        </nav>
+        <script src="scripts.js"></script>
 </body>
 </html>
