@@ -104,32 +104,33 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// POST /register
 app.post('/register', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Verifica si el correo electrónico ya está registrado
-    const existingUser = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-
-    if (existingUser.rows.length > 0) {
-      return res.send('<h1>El correo ya está registrado</h1><a href="/register">Volver</a>');
+    // 1) revisa existencia
+    const { rows } = await pool.query(
+      'SELECT 1 FROM usuarios WHERE email = $1',
+      [email]
+    );
+    if (rows.length) {
+      return res.send('<h1>Correo ya existe</h1><a href="/register">Volver</a>');
     }
 
-    // Genera el siguiente id usando nextval de la secuencia usuarios_id_seq
-    const { rows } = await pool.query('SELECT nextval(\'usuarios_id_seq\') AS id');
-    const newId = rows[0].id;
+    // 2) hashea
+    const hashed = await bcrypt.hash(password, 10);
 
-    // Hashea la contraseña antes de insertarla
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 3) inserta sin 'id'
+    await pool.query(
+      'INSERT INTO usuarios (email, password) VALUES ($1, $2)',
+      [email, hashed]
+    );
 
-    // Inserta el nuevo usuario con el id generado automáticamente
-    await pool.query('INSERT INTO usuarios (id, email, password) VALUES ($1, $2, $3)', [newId, email, hashedPassword]);
-
-    // Responde al cliente con un mensaje de éxito
-    res.send('<h1>Registro exitoso</h1><a href="/login">Iniciar sesión</a>');
+    res.send('<h1>Registro OK</h1><a href="/login">Login</a>');
   } catch (err) {
-    console.error('Error al registrar usuario:', err);
-    res.status(500).send('Error en el servidor al registrar.');
+    console.error(err);
+    res.status(500).send('Error al registrar');
   }
 });
 
