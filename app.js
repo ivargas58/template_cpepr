@@ -109,7 +109,7 @@ app.post('/register', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // 1) revisa existencia
+    // 1) Verifica si el usuario ya existe
     const { rows } = await pool.query(
       'SELECT 1 FROM usuarios WHERE email = $1',
       [email]
@@ -118,21 +118,27 @@ app.post('/register', async (req, res) => {
       return res.send('<h1>Correo ya existe</h1><a href="/register">Volver</a>');
     }
 
-    // 2) hashea
-    const hashed = await bcrypt.hash(password, 10);
+    // 2) Hashea la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3) inserta sin 'id'
+    // 3) Obtén el último ID utilizado para evitar duplicados (si no quieres usar la secuencia)
+    const result = await pool.query('SELECT MAX(id) FROM usuarios');
+    const nextId = result.rows[0].max + 1;  // Calcula el siguiente ID.
+
+    // 4) Inserta el nuevo usuario con el ID generado manualmente
     await pool.query(
-      'INSERT INTO usuarios (email, password) VALUES ($1, $2)',
-      [email, hashed]
+      'INSERT INTO usuarios (id, email, password) VALUES ($1, $2, $3)',
+      [nextId, email, hashedPassword]
     );
 
+    // 5) Responde con mensaje de éxito
     res.send('<h1>Registro OK</h1><a href="/login">Login</a>');
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error al registrar');
+    console.error('Error al registrar usuario:', err);
+    res.status(500).send('Error en el servidor al registrar.');
   }
 });
+
 
 
 
