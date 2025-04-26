@@ -137,7 +137,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-const crypto = require('crypto');
+/*const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 app.post('/forgot-password', async (req, res) => {
@@ -184,7 +184,7 @@ app.post('/forgot-password', async (req, res) => {
     res.status(500).send('Error en el servidor.');
   }
 });
-
+*/
 app.get('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
 
