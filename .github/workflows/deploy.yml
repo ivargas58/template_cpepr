@@ -33,14 +33,12 @@ jobs:
             cd ~/template_cpepr
 
             # Crear el archivo .env
-            cat <<EOT > .env
-DB_HOST=${{ secrets.DB_HOST }}
-DB_USER=${{ secrets.DB_USER }}
-DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-DB_NAME=${{ secrets.DB_NAME }}
-DB_PORT=${{ secrets.DB_PORT }}
-FIX_SECRET=${{ secrets.FIX_SECRET }}
-EOT
+            echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "FIX_SECRET=${{ secrets.FIX_SECRET }}" >> .env
 
             # Instalar dependencias
             npm install
@@ -74,7 +72,7 @@ EOT
           curl -H "Content-Type: application/json" \
           -X POST \
           -d '{
-            "embeds": [ {
+            "embeds": [{
               "title": "✅ Nuevo Deploy en EC2",
               "color": 5814783,
               "fields": [
@@ -90,4 +88,4 @@ EOT
               }
             }]
           }' \
-          $WEBHOOK_URL
+          "$WEBHOOK_URL"
