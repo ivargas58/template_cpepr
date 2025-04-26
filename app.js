@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const pool = require('./db'); 
-//const session = require('express-session');
+const session = require('express-session');
 
 
 const app = express();
