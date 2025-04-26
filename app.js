@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const pool = require('./db'); 
-const session = require('express-session');
+//const session = require('express-session');
 
 
 const app = express();
@@ -185,7 +185,7 @@ app.post('/forgot-password', async (req, res) => {
   }
 });
 */
-app.get('/reset-password/:token', async (req, res) => {
+/*app.get('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
 
   try {
@@ -206,9 +206,9 @@ app.get('/reset-password/:token', async (req, res) => {
     console.error('Error mostrando página de reset:', err);
     res.status(500).send('Error en el servidor.');
   }
-});
+});*/
 
-app.post('/reset-password/:token', async (req, res) => {
+/*app.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { newPassword } = req.body;
 
@@ -227,7 +227,7 @@ app.post('/reset-password/:token', async (req, res) => {
     console.error('Error actualizando contraseña:', err);
     res.status(500).send('Error en el servidor.');
   }
-});
+});*/
 
 
 // Ruta de prueba para ver usuarios (solo desarrollo, no usar en producción así)
