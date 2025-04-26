@@ -25,14 +25,13 @@ jobs:
           ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << 'EOF'
             set -e  # Detener si hay un error
 
-            # Borrar carpeta anterior si existe
-            rm -rf ~/template_cpepr
+            # Moverse al directorio o clonarlo si no existe
+            cd ~/template_cpepr || git clone https://github.com/ivargas58/template_cpepr.git ~/template_cpepr && cd ~/template_cpepr
 
-            # Clonar nuevamente
-            git clone https://github.com/ivargas58/template_cpepr.git ~/template_cpepr
-            cd ~/template_cpepr
+            # Actualizar código
+            git pull origin main
 
-            # Crear el archivo .env
+            # Crear/Actualizar el archivo .env
             echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
             echo "DB_USER=${{ secrets.DB_USER }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
@@ -49,11 +48,8 @@ jobs:
               sudo npm install -g pm2
             fi
 
-            # Detener proceso viejo si existe
-            pm2 delete template_cpepr || true
-
-            # Iniciar el servidor
-            pm2 start ecosystem.config.js --name template_cpepr
+            # Reiniciar PM2 con configuración
+            pm2 reload ecosystem.config.js --name template_cpepr || pm2 start ecosystem.config.js --name template_cpepr
             pm2 save
           EOF
 
