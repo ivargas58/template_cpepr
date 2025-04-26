@@ -47,6 +47,10 @@ app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
+app.get('/forgot-password', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'forgot-password.html'));
+});
+
 app.get('/pago', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pago.html'));
 });
@@ -133,23 +137,95 @@ app.post('/register', async (req, res) => {
   }
 });
 
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+
 app.post('/forgot-password', async (req, res) => {
-  const { email, newPassword } = req.body;
+  const { email } = req.body;
 
   try {
     const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-
     if (result.rows.length === 0) {
       return res.send('<h1>Correo no registrado</h1><a href="/forgot-password">Volver</a>');
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await pool.query('UPDATE usuarios SET password = $1 WHERE email = $2', [hashedPassword, email]);
+    // Crear token único
+    const token = crypto.randomBytes(32).toString('hex');
 
-    res.send('<h1>Contraseña actualizada correctamente</h1><a href="/login">Iniciar sesión</a>');
+    // Guardar token en base de datos
+    await pool.query('UPDATE usuarios SET reset_token = $1 WHERE email = $2', [token, email]);
+
+    // Configurar transportador de Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER,   // Tu Gmail
+        pass: process.env.EMAIL_PASS    // Tu contraseña de aplicación Gmail
+      }
+    });
+
+    const resetLink = `http://tu-dominio.com/reset-password/${token}`; // Cambia por tu dominio real
+
+    await transporter.sendMail({
+      from: '"Soporte" <tuemail@gmail.com>',
+      to: email,
+      subject: 'Recuperar contraseña',
+      html: `
+        <h2>Recuperar contraseña</h2>
+        <p>Haz clic en el siguiente enlace para cambiar tu contraseña:</p>
+        <a href="${resetLink}">Restablecer contraseña</a>
+      `
+    });
+
+    res.send('<h1>Correo enviado. Revisa tu bandeja de entrada.</h1><a href="/login">Volver</a>');
+
   } catch (err) {
-    console.error('Error al recuperar contraseña:', err);
-    res.status(500).send('Error en el servidor al actualizar la contraseña.');
+    console.error('Error en forgot-password:', err);
+    res.status(500).send('Error en el servidor.');
+  }
+});
+
+app.get('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const result = await pool.query('SELECT * FROM usuarios WHERE reset_token = $1', [token]);
+    if (result.rows.length === 0) {
+      return res.send('<h1>Token inválido</h1><a href="/forgot-password">Intentar de nuevo</a>');
+    }
+
+    // Mostrar formulario para nueva contraseña
+    res.send(`
+      <h1>Restablecer contraseña</h1>
+      <form action="/reset-password/${token}" method="POST">
+        <input type="password" name="newPassword" placeholder="Nueva contraseña" required />
+        <button type="submit">Guardar nueva contraseña</button>
+      </form>
+    `);
+  } catch (err) {
+    console.error('Error mostrando página de reset:', err);
+    res.status(500).send('Error en el servidor.');
+  }
+});
+
+app.post('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
+
+  try {
+    const result = await pool.query('SELECT * FROM usuarios WHERE reset_token = $1', [token]);
+    if (result.rows.length === 0) {
+      return res.send('<h1>Token inválido</h1><a href="/forgot-password">Intentar de nuevo</a>');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await pool.query('UPDATE usuarios SET password = $1, reset_token = NULL WHERE reset_token = $2', [hashedPassword, token]);
+
+    res.send('<h1>Contraseña actualizada exitosamente.</h1><a href="/login">Iniciar sesión</a>');
+  } catch (err) {
+    console.error('Error actualizando contraseña:', err);
+    res.status(500).send('Error en el servidor.');
   }
 });
 
