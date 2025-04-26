@@ -23,21 +23,38 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << 'EOF'
-            cd ~/template_cpepr || git clone https://github.com/ivargas58/template_cpepr.git && cd template_cpepr
-            git pull origin main
+            set -e  # Detener si hay un error
 
-            # Crear el archivo .env en EC2
-            cat <<EOT > .env
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            FIX_SECRET=${{ secrets.FIX_SECRET }}
-            EOT
+            # Borrar carpeta anterior si existe
+            rm -rf ~/template_cpepr
 
+            # Clonar nuevamente
+            git clone https://github.com/ivargas58/template_cpepr.git ~/template_cpepr
+            cd ~/template_cpepr
+
+            # Crear el archivo .env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "FIX_SECRET=${{ secrets.FIX_SECRET }}" >> .env
+
+            # Instalar dependencias
             npm install
-            pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js || pm2 restart template_cpepr
+
+            # Instalar PM2 si no existe
+            if ! command -v pm2 &> /dev/null
+            then
+              sudo npm install -g pm2
+            fi
+
+            # Detener proceso viejo si existe
+            pm2 delete template_cpepr || true
+
+            # Iniciar el servidor
+            pm2 start ecosystem.config.js --name template_cpepr
+            pm2 save
           EOF
 
       - name: Notificar Deploy a Discord
@@ -71,4 +88,4 @@ jobs:
               }
             }]
           }' \
-          $WEBHOOK_URL
+          "$WEBHOOK_URL"
