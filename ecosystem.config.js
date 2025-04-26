@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "simple-node-app",
+      name: "template_cpepr",
       script: "./app.js",
       instances: 1,
       exec_mode: "fork",
