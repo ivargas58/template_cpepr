@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << EOF
+          ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-128-13-108.us-east-2.compute.amazonaws.com << 'EOF'
             cd ~/template_cpepr || git clone https://github.com/ivargas58/template_cpepr.git && cd template_cpepr
             git pull origin main
 
@@ -48,7 +48,10 @@ jobs:
           BRANCH: ${{ github.ref }}
           REPOSITORY: ${{ github.repository }}
           TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
+          COMMIT_URL="https://github.com/${REPOSITORY}/commit/${COMMIT_SHA}"
+
           curl -H "Content-Type: application/json" \
           -X POST \
           -d '{
@@ -58,8 +61,9 @@ jobs:
               "fields": [
                 {"name": "Usuario", "value": "'"$ACTOR"'", "inline": true},
                 {"name": "Branch", "value": "'"$BRANCH"'", "inline": true},
-                {"name": "Repositorio", "value": "'"$REPOSITORY"'", "inline": true},
+                {"name": "Repositorio", "value": "'"$REPOSITORY"'", "inline": false},
                 {"name": "Commit", "value": "'"$MESSAGE"'", "inline": false},
+                {"name": "Ver Commit", "value": "[Click aquí para ver el commit]('"$COMMIT_URL"')", "inline": false},
                 {"name": "Fecha", "value": "'"$TIMESTAMP"'", "inline": false}
               ],
               "footer": {
