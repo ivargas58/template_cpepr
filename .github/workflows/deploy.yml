@@ -50,3 +50,64 @@ jobs:
             npm install
             pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js || pm2 restart template_cpepr
           EOF
+          name: Deploy Automático + Notificación Discord
+
+on:
+  push:
+    branches:
+      - main # O la rama que uses para producción
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Conectar y desplegar en servidor
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          cd /ruta/tu/app
+          git pull origin main
+          npm install
+          pm2 reload all
+
+    - name: Notificar a Discord
+      env:
+        WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        ACTOR: ${{ github.actor }}
+        MESSAGE: ${{ github.event.head_commit.message }}
+        BRANCH: ${{ github.ref }}
+        REPOSITORY: ${{ github.repository }}
+        TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+      run: |
+        curl -H "Content-Type: application/json" \
+        -X POST \
+        -d '{
+          "embeds": [{
+            "title": "✅ Nuevo Deploy Realizado",
+            "color": 5814783,
+            "fields": [
+              {"name": "Usuario", "value": "'"$ACTOR"'", "inline": true},
+              {"name": "Branch", "value": "'"$BRANCH"'", "inline": true},
+              {"name": "Repositorio", "value": "'"$REPOSITORY"'", "inline": true},
+              {"name": "Mensaje Commit", "value": "'"$MESSAGE"'", "inline": false},
+              {"name": "Fecha", "value": "'"$TIMESTAMP"'", "inline": false}
+            ],
+            "footer": {
+              "text": "Despliegue automático exitoso 🚀"
+            }
+          }]
+        }' \
+        $WEBHOOK_URL
+
