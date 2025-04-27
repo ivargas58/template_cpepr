@@ -44,6 +44,10 @@ app.get('/pago', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pago.html'));
 });
 
+app.get('/conocenos', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'conocenos.html'));
+});
+
 app.get('/logout', (req, res) => {
   // Sin express-session, solo redirige al login
   res.redirect('/login');
