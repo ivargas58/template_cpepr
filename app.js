@@ -48,12 +48,15 @@ app.get('/conocenos', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'conocenos.html'));
 });
 
+app.get('/admin/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 app.get('/logout', (req, res) => {
   // Sin express-session, solo redirige al login
   res.redirect('/login');
 });
 
-// Login que verifica si el password está hasheado
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -81,18 +84,23 @@ app.post('/login', async (req, res) => {
 
       // Hashear y actualizar contraseña automáticamente
       const hashedPassword = await bcrypt.hash(password, 10);
-      await pool.query('UPDATE usuarios SET password = $1 WHERE id = $2', [hashedPassword, usuario.id]);
-      console.log(`Contraseña convertida a hash para el usuario con ID ${usuario.id}`);
+      await pool.query('UPDATE usuarios SET password = $1 WHERE email = $2', [hashedPassword, usuario.email]);
+      console.log(`Contraseña convertida a hash para el usuario con email ${usuario.email}`);
     }
 
-    // Login exitoso
-    res.redirect('/pago');
+    // Login exitoso: redirige según rol
+    if (usuario.rol === 'admin') {
+      res.redirect('/admin/dashboard');
+    } else {
+      res.redirect('/pago');
+    }
 
   } catch (err) {
     console.error('Error al procesar login:', err);
     res.status(500).send('Error en el servidor al procesar el login.');
   }
 });
+
 
 app.post('/register', async (req, res) => {
   const { email, password } = req.body;
@@ -110,10 +118,10 @@ app.post('/register', async (req, res) => {
     // Hashea la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Inserta el nuevo usuario
+    // Inserta el nuevo usuario con rol 'user'
     await pool.query(
-      'INSERT INTO usuarios (email, password) VALUES ($1, $2)',
-      [email, hashedPassword]
+      'INSERT INTO usuarios (email, password, rol) VALUES ($1, $2, $3)',
+      [email, hashedPassword, 'user']
     );
 
     res.send('<h1>Registro OK</h1><a href="/login">Login</a>');
@@ -123,20 +131,6 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// Ruta de prueba para ver usuarios (solo desarrollo, no usar en producción así)
-app.get('/usuarios', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM usuarios;');
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error al obtener usuarios:', err);
-    res.status(500).send(`
-      <h1>Error al obtener usuarios</h1>
-      <p>${err.message}</p>
-      <pre>${err.stack}</pre>
-    `);
-  }
-});
 
 //Server route
 app.listen(PORT, () => {
